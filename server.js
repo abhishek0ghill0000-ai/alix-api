@@ -1,13 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-app.use(express.json());
-app.use(cors());
-
-app.get('/', (req, res) => res.send('Alix API working!'));
-
-app.listen(PORT, () => console.log(`Server on port ${PORT}`));
+app.get('/health', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    client.release();
+    res.send('DB connected!');
+  } catch (err) {
+    res.status(500).send('DB error');
+  }
+});
